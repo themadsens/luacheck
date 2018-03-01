@@ -299,6 +299,37 @@ simple_expressions["function"] = function(state)
    return parse_function(state, function_location)
 end
 
+-- Parses argument list and the return expr
+local function parse_lambda(state, loc)
+   local paren_location = location(state)
+   local args = {}
+   -- check_and_skip_token(state, "|")
+   if state.token ~= "|" then  -- Are there arguments?
+      repeat
+         if state.token == "name" then
+            args[#args+1] = parse_id(state)
+         elseif state.token == "..." then
+            args[#args+1] = simple_expressions["..."](state)
+            break
+         else
+            parse_error(state, "expected argument")
+         end
+      until not test_and_skip_token(state, ",")
+   end
+
+   check_closing_token(state, "|", "|", paren_location)
+   local exprlist = init_ast_node({ (parse_expression(state)), first_token="return" }, loc, "Lambda")
+   local body = init_ast_node({ init_ast_node(exprlist, loc, "Return") }, loc)
+   local end_location = location(state)
+   return init_ast_node({args, body, end_location = end_location}, loc, "Function")
+end
+
+simple_expressions["|"] = function(state)
+   local function_location = location(state)
+   skip_token(state)  -- Skip "function".
+   return parse_lambda(state, function_location)
+end
+
 local calls = {}
 
 calls["("] = function(state)

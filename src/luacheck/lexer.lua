@@ -16,7 +16,7 @@ local BYTE_x, BYTE_X, BYTE_i, BYTE_I = sbyte("x"), sbyte("X"), sbyte("i"), sbyte
 local BYTE_l, BYTE_L, BYTE_u, BYTE_U = sbyte("l"), sbyte("L"), sbyte("u"), sbyte("U")
 local BYTE_e, BYTE_E, BYTE_p, BYTE_P = sbyte("e"), sbyte("E"), sbyte("p"), sbyte("P")
 local BYTE_a, BYTE_z, BYTE_A, BYTE_Z = sbyte("a"), sbyte("z"), sbyte("A"), sbyte("Z")
-local BYTE_DOT, BYTE_COLON = sbyte("."), sbyte(":")
+local BYTE_DOT, BYTE_COLON , BYTE_PIPE= sbyte("."), sbyte(":"), sbyte("|")
 local BYTE_OBRACK, BYTE_CBRACK = sbyte("["), sbyte("]")
 local BYTE_OBRACE, BYTE_CBRACE = sbyte("{"), sbyte("}")
 local BYTE_QUOTE, BYTE_DQUOTE = sbyte("'"), sbyte('"')
@@ -530,6 +530,11 @@ local function lex_bracket(state)
    end
 end
 
+local function lex_lambda(state)
+   next_byte(state)
+   return "|"
+end
+
 local function lex_eq(state)
    local b = next_byte(state)
 
@@ -644,7 +649,8 @@ local byte_handlers = {
    [BYTE_NE] = lex_ne,
    [BYTE_LT] = lex_lt,
    [BYTE_GT] = lex_gt,
-   [BYTE_LDASH] = lex_ident
+   [BYTE_LDASH] = lex_ident,
+   [BYTE_PIPE] = lex_lambda,
 }
 
 for b=BYTE_0, BYTE_9 do
